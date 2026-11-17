@@ -1,65 +1,119 @@
 ﻿
 
-public class Book
+using System;
+using System.Collections.Generic;
+class Player
 {
-    public string Author;
-    public string Title;
-    public string Publisher;
-
-    public int Year;
-    
-    public Book (string author, string title, string publisher, int year)
+    public string NickName { get; }
+    public int Score { get; set; }
+    public int Level { get; set; }
+    public Player(string nickName, int score, int level)
     {
-     
-        Author = author;
-        Title = title;
-        Publisher = publisher;
-        Year = year;
+        NickName = nickName;
+        Score = score;
+        Level = level;
     }
-}public class Program
-{
-    public static void Main()
+    public string GetInfo()
     {
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
-        Console.InputEncoding = System.Text.Encoding.UTF8;
-        bool exit = false;
-        List<Book> books = new List<Book>();
-        do
+        return $"Нік: {NickName}, Рахунок: {Score}, Рівень: {Level}";
+    }
+}class PlayerDateBase
+{
+    private Dictionary<string, Player> players = new Dictionary<string, Player>();
+    public void AddPlayer(Player player)
+    {
+        if (!players.ContainsKey(player.NickName))
         {
-            Console.WriteLine("Введіть автора книги:");
-            string author = Console.ReadLine();
-            Console.WriteLine("Введіть назву книги:");
-            string title = Console.ReadLine();
-            Console.WriteLine("Введіть видавництво книги:");
-            string publisher = Console.ReadLine();
-            Console.WriteLine("Введіть рік видання книги:");
-            int year = int.Parse(Console.ReadLine());
-            Book book = new Book(author, title, publisher, year);
-            books.Add(book);
-            Console.WriteLine("Для завершення введіть 'exit'");
-            if (Console.ReadLine() == "exit")
-            {
-                exit = true;
-            }
-            else
-            {
-                Console.WriteLine("Продовжити введення книг...");
-            }
-        } while (!exit);
-        Console.WriteLine("Введіть автора книги для пошуку:");
-        string searchAuthor = Console.ReadLine();
-        bool found = false; 
-        foreach (Book book in books)
-        {
-            if (book.Author == searchAuthor && book.Year < 2009)
-            {
-                Console.WriteLine($"Автор: {book.Author}, Назва: {book.Title}, Видавництво: {book.Publisher}, Рік видання: {book.Year}");
-                found = true;
-            }
+            players[player.NickName] = player;
         }
-        if (!found)
+    }
+    public Player FindPlayer(string nickName)
+    {
+        players.TryGetValue(nickName, out Player player);
+        return player;
+    }
+    public bool RemovePlayer(string nickName)
+    {
+        return players.Remove(nickName);
+    }
+    public void GetAllPlayers()
+    {
+        if (players.Count == 0)
         {
-            Console.WriteLine("Книги цього автора, видані до 2009 року, не знайдено.");
+            Console.WriteLine("Список гравців порожній.");
+            return;
+        }
+        foreach (var player in players.Values)
+        {
+            Console.WriteLine(player.GetInfo());
         }
     }
 }
+class Program
+{
+    static void Main()
+    {
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Console.InputEncoding = System.Text.Encoding.UTF8;
+        PlayerDateBase playerDB = new PlayerDateBase();
+        bool exit = false; 
+        while (!exit) { 
+           Console.WriteLine("Для того щоб добавити гравця, натисніть 1,щоб знайти гравця, натисніть 2 ,щоб видалити гравця, натисніть 3, щоб показати всіх гравців, натисніть 4, щоб вийти, натисніть 0");
+            int input = Convert.ToInt32(Console.ReadLine());
+            switch (input)
+            {
+                case 1:
+                    Console.Write("Введіть нік гравця: ");
+                    string nickName = Console.ReadLine();
+
+                    Console.Write("Введіть рахунок гравця: ");
+                    int score = Convert.ToInt32(Console.ReadLine());
+
+                    Console.Write("Введіть рівень гравця: ");
+                    int level = Convert.ToInt32(Console.ReadLine());
+
+                    Player newPlayer = new Player(nickName, score, level);
+                    playerDB.AddPlayer(newPlayer);
+                    break;
+                case 2:
+                    Console.Write("Введіть нік гравця для пошуку: ");
+                    string Name = Console.ReadLine();
+                    Player found = playerDB.FindPlayer(Name);
+                    if (found != null)
+                    {
+                        Console.WriteLine(found.GetInfo());
+                    }
+                    else
+                    {
+                        Console.WriteLine("Гравець не знайдений.");
+                    }
+                    break;
+                case 3:
+                    Console.Write("Введіть нік гравця для пошуку: ");
+                    string nick = Console.ReadLine();
+                    bool removed = playerDB.RemovePlayer(nick);
+                    if (removed)
+                    {
+                        Console.WriteLine("Гравець успішно видалений.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Гравець не знайдений.");
+                    }
+                    break;
+                case 4:
+                   Console.WriteLine("Список всіх гравців:");
+                    playerDB.GetAllPlayers();
+                    break;
+                case 0:
+                    exit = true;
+                    break;
+                default:
+                    Console.WriteLine("Невірний вибір. Спробуйте ще раз.");
+                    break;
+            }
+        }
+    }
+}
+
+
